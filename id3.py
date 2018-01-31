@@ -41,9 +41,26 @@ def infogain(py_pxi, pxi, py, total):
 # - collect counts for each variable value with each class label
 # - find the best variable to split on, according to mutual information
 # - partition data based on a given variable	
-	
-	
-	
+
+def getBest(data, names):
+    gsuc = 0
+    ndex = 0
+    for i in range(0, len(names)-1):
+        tot = 0
+        suc = 0
+        print "testing " + names[i] + "..."
+        for item in data:
+            tot += 1
+            if item[i] == 1:
+                if item[-1] == 1:
+                    suc += 1
+
+        if suc > gsuc:
+            gsuc = suc
+            ndex = i
+
+    print str(names[ndex]) + " is the best attribute, with " + str(gsuc) + " entries out of " + str(tot) + " passing with it."
+
 # Load data from a file
 def read_data(filename):
     f = open(filename, 'r')
@@ -87,6 +104,7 @@ def loadAndTrain(trainS,testS,modelS):
 	# build_tree is the main function you'll have to implement, along with
     # any helper functions needed.  It should return the root node of the
     # decision tree.
+        getBest(test, varnames)
 	root = build_tree(train, varnames)
 	print_model(root, modelfile)
 	
