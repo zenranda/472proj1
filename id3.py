@@ -5,6 +5,7 @@
 # Starter code provided by Daniel Lowd, 1/25/2018
 #
 #
+from __future__ import division
 import sys
 import re
 # Node class for the decision tree
@@ -43,14 +44,28 @@ def infogain(py_pxi, pxi, py, total):
 # - partition data based on a given variable	
 
 def getBest(data, names):
+    #given data, find the most successful attribute
+    #that is to say, the attribute that leads to a result of 1
+    #the most frequently
+
+    #entropy check
+    tot = 0
+    pas = 0
+    for item in data:
+        tot += 1
+        if item[-1] == 1:
+            pas +=1
+
+    entsucc = entropy(pas/tot)
+    print pas
+    print entsucc
+
     gsuc = 0
     ndex = 0
     for i in range(0, len(names)-1):
-        tot = 0
         suc = 0
         print "testing " + names[i] + "..."
         for item in data:
-            tot += 1
             if item[i] == 1:
                 if item[-1] == 1:
                     suc += 1
@@ -58,8 +73,7 @@ def getBest(data, names):
         if suc > gsuc:
             gsuc = suc
             ndex = i
-
-    print str(names[ndex]) + " is the best attribute, with " + str(gsuc) + " entries out of " + str(tot) + " passing with it."
+    print str(names[ndex]) + " is the best attribute, with " + str(gsuc) + " entries out of " + str(len(data)) + " passing with it."
 
 # Load data from a file
 def read_data(filename):
