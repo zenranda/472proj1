@@ -5,6 +5,7 @@
 # Starter code provided by Daniel Lowd, 1/25/2018
 #
 #
+#for entropy calcs
 from __future__ import division
 import sys
 import re
@@ -23,6 +24,8 @@ root=None
 # Helper function computes entropy of Bernoulli distribution with
 # parameter p
 def entropy(p):
+        if p == 0 or p == 1:
+            return 0
         lf = p
         rh = 1 - p
         res = -(rh * math.log(rh, 2)) - (lf*math.log(lf, 2))
@@ -34,9 +37,13 @@ def entropy(p):
 # py : number of ocurrences of y=1
 # total : total length of the data
 def infogain(py_pxi, pxi, py, total):
+        entotal = entropy(py/total)
+        enelement = ((py_pxi/total) * entropy(py_pxi/pxi)) + (((pxi- py_pxi)/total) * entropy((pxi-py_pxi)/total))
+        gain = entotal - enelement
+        return gain
 	# >>>> YOUR CODE GOES HERE <<<<
-    # For now, always return "0":
-	return 0;
+        # For now, always return "0":
+	#return 0;
 
 # OTHER SUGGESTED HELPER FUNCTIONS:
 # - collect counts for each variable value with each class label
@@ -119,6 +126,8 @@ def loadAndTrain(trainS,testS,modelS):
     # any helper functions needed.  It should return the root node of the
     # decision tree.
         getBest(test, varnames)
+        for i in range(1,10):
+            print infogain(i,9,9,14)
 	root = build_tree(train, varnames)
 	print_model(root, modelfile)
 	
@@ -139,7 +148,6 @@ def runTest():
 # Load train and test data.  Learn model.  Report accuracy.
 def main(argv):
     if (len(argv) != 3):
-                print entropy(0.8571428571428)
 		print 'Usage: id3.py <train> <test> <model>'
 		sys.exit(2)
     loadAndTrain(argv[0],argv[1],argv[2]) 
