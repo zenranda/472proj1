@@ -24,7 +24,7 @@ root=None
 # Helper function computes entropy of Bernoulli distribution with
 # parameter p
 def entropy(p):
-        if p == 0 or p == 1:
+        if p == 0 or p >= 1:
             return 0
         lf = p
         rh = 1 - p
@@ -37,50 +37,19 @@ def entropy(p):
 # py : number of ocurrences of y=1
 # total : total length of the data
 def infogain(py_pxi, pxi, py, total):
+
         entotal = entropy(py/total)
-        enelement = ((py_pxi/total) * entropy(py_pxi/pxi)) + (((pxi- py_pxi)/total) * entropy((pxi-py_pxi)/total))
-        gain = entotal - enelement
+        gain = 0
+        if pxi == total:
+            gain = entotal - ((pxi/total) * entropy(py_pxi/pxi))
+        elif pxi != 0:
+            gain = entotal - ((pxi/total)*entropy(py_pxi/pxi)) - (((total-pxi)/total) * entropy((py-py_pxi)/(total-pxi)))
         return gain
-	# >>>> YOUR CODE GOES HERE <<<<
-        # For now, always return "0":
-	#return 0;
 
 # OTHER SUGGESTED HELPER FUNCTIONS:
 # - collect counts for each variable value with each class label
 # - find the best variable to split on, according to mutual information
 # - partition data based on a given variable	
-
-def getBest(data, names):
-    #given data, find the most successful attribute
-    #that is to say, the attribute that leads to a result of 1
-    #the most frequently
-
-    #entropy check
-    tot = 0
-    pas = 0
-    for item in data:
-        tot += 1
-        if item[-1] == 1:
-            pas +=1
-
-    entsucc = entropy(pas/tot)
-    print pas
-    print entsucc
-
-    gsuc = 0
-    ndex = 0
-    for i in range(0, len(names)-1):
-        suc = 0
-        print "testing " + names[i] + "..."
-        for item in data:
-            if item[i] == 1:
-                if item[-1] == 1:
-                    suc += 1
-
-        if suc > gsuc:
-            gsuc = suc
-            ndex = i
-    print str(names[ndex]) + " is the best attribute, with " + str(gsuc) + " entries out of " + str(len(data)) + " passing with it."
 
 # Load data from a file
 def read_data(filename):
@@ -100,13 +69,70 @@ def print_model(root, modelfile):
     f = open(modelfile, 'w+')
     root.write(f, 0)
 
+def findSuccess(data):
+#helper function: given data, find all y in the last field s.t y = 1
+    succ = 0
+    for item in data:
+        if item[-1] == 1:
+            succ += 1
+    return succ
+
+def splitr(pred, varnames):
+#helper function: given a prediction, creates either a 1 or 0 leaf
+    if pred > 0.5:
+        return node.Leaf(varnames,1)
+    else:
+        return node.Leaf(varnames,0)
+
+def findattr(data, place):
+#helper function: given an index, counts all entries with a 1 in the attribute in that index
+#and also counts all entries with a one both in the given index and their last
+    posx = 0
+    pos_x_y = 0
+    for item in data:
+        if item[place] == 1:
+            posx += 1
+        if item[-1] == 1:
+            pos_x_y += 1
+
+    return (posx, pos_x_y)
 # Build tree in a top-down manner, selecting splits until we hit a
 # pure leaf or all splits look bad.
 def build_tree(data, varnames):
-    # >>>> YOUR CODE GOES HERE <<<<
-    # For now, always return a leaf predicting "1":
-    return node.Leaf(varnames, 1)
+    succ = findSuccess(data)  #grabs the initial success rate
 
+    pred = (succ / len(data)) #predicts based on the ratio of passes / failures
+
+    if len(varnames) == 1:    #if there's only one attribute left, split on it automaticall
+        return splitr(pred, varnames)
+
+    info = 0      #information gain, tallied per attribute
+    for i in range(len(varnames) - 1):
+        posx = 0      #count of the total entries with a 1 in their ith index
+        pos_x_y = 0   #and of the total entries with a 1 in their ith index AND their last index
+
+        res = findattr(data, i)
+        posx = res[0]
+        pos_x_y = res[1]
+
+        calced = infogain(pos_x_y, posx, succ, len(data))
+        if calced > info:  #find largest gain to split on
+            info = calced
+            place = i
+
+    if info == 0:
+        return splitr(pred, varnames)
+
+    left = []
+    right = []
+    for i in range(len(data)):   #split each branch's possible values into left and right
+        if data[i][place] == 0:
+            left.append(data[i])
+        else:
+            right.append(data[i])
+
+    #recursive call, continues the tree
+    return node.Split(varnames, place, build_tree(left, varnames), build_tree(right, varnames))
 
 # "varnames" is a list of names, one for each variable
 # "train" and "test" are lists of examples.
@@ -121,16 +147,13 @@ def loadAndTrain(trainS,testS,modelS):
 	(train, varnames) = read_data(trainS)
 	(test, testvarnames) = read_data(testS)
 	modelfile = modelS
-	
+
 	# build_tree is the main function you'll have to implement, along with
     # any helper functions needed.  It should return the root node of the
     # decision tree.
-        getBest(test, varnames)
-        for i in range(1,10):
-            print infogain(i,9,9,14)
 	root = build_tree(train, varnames)
 	print_model(root, modelfile)
-	
+
 def runTest():
 	correct = 0
 	# The position of the class label is the last element in the list.
