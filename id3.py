@@ -43,9 +43,9 @@ def infogain(py_pxi, pxi, py, total):
         if pxi == total:
             gain = entotal - ((pxi/total) * entropy(py_pxi/pxi))
         elif pxi != 0:
-            gain = entotal - ((pxi/total)*entropy(py_pxi/pxi)) - (((total-pxi)/total) * entropy((total-pxi)/(total)))
+            gain = entotal - ((pxi/total)*entropy(py_pxi/pxi)) - (((total-pxi)/total) * entropy((py-py_pxi)/(total-pxi)))
         elif pxi == 0:
-            gain = entotal - ((total-pxi)/total) # *entropy((py -py_pxi)/(total - pxi))
+            gain = entotal - ((total-pxi)/total)  *entropy((py -py_pxi)/(total - pxi))
         return gain
 
 # OTHER SUGGESTED HELPER FUNCTIONS:
