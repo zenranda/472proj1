@@ -37,16 +37,6 @@ def entropy(p):
 # py : number of ocurrences of y=1
 # total : total length of the data
 def infogain(py_pxi, pxi, py, total):
-        if py_pxi > pxi:
-            print "whoa nelly"
-            print pxi
-            print py_pxi
-
-        if py > total:
-            print "whoa nelly"
-            print py
-            print total
-            
 
         entotal = entropy(py/total)
         gain = 0
@@ -98,7 +88,7 @@ def splitr(pred, varnames):
 
 def findattr(data, place):
 #helper function: given an index, counts all entries with a 1 in the attribute in that index
-#and also counts all entries with a one in their last index
+#and also counts all entries with a one in their last index as well
     posx = 0
     pos_x_y = 0
     for item in data:
@@ -108,6 +98,7 @@ def findattr(data, place):
                 pos_x_y += 1
 
     return (posx, pos_x_y)
+
 # Build tree in a top-down manner, selecting splits until we hit a
 # pure leaf or all splits look bad.
 def build_tree(data, varnames):
@@ -121,7 +112,7 @@ def build_tree(data, varnames):
     info = 0      #information gain, tallied per attribute
     for i in range(len(varnames) - 1):
         posx = 0      #count of the total entries with a 1 in their ith index
-        pos_x_y = 0   #and of the total entries with a 1 in their last index
+        pos_x_y = 0   #and of the total entries with a 1 in their last and ith index
 
         res = findattr(data, i)
         posx = res[0]
