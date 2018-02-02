@@ -24,7 +24,7 @@ root=None
 # Helper function computes entropy of Bernoulli distribution with
 # parameter p
 def entropy(p):
-        if p == 0 or p >= 1:
+        if p == 0 or p == 1:
             return 0
         lf = p
         rh = 1 - p
@@ -37,13 +37,25 @@ def entropy(p):
 # py : number of ocurrences of y=1
 # total : total length of the data
 def infogain(py_pxi, pxi, py, total):
+        if py_pxi > pxi:
+            print "whoa nelly"
+            print pxi
+            print py_pxi
+
+        if py > total:
+            print "whoa nelly"
+            print py
+            print total
+            
 
         entotal = entropy(py/total)
         gain = 0
         if pxi == total:
             gain = entotal - ((pxi/total) * entropy(py_pxi/pxi))
         elif pxi != 0:
-            gain = entotal - ((pxi/total)*entropy(py_pxi/pxi)) - (((total-pxi)/total) * entropy((py-py_pxi)/(total-pxi)))
+            gain = entotal - ((pxi/total)*entropy(py_pxi/pxi)) - (((total-pxi)/total) * entropy((pxi - py_pxi)/(pxi)))
+        elif pxi == 0:
+            gain = entotal - ((total-pxi)/total) # *entropy((py -py_pxi)/(total - pxi))
         return gain
 
 # OTHER SUGGESTED HELPER FUNCTIONS:
@@ -79,21 +91,21 @@ def findSuccess(data):
 
 def splitr(pred, varnames):
 #helper function: given a prediction, creates either a 1 or 0 leaf
-    if pred > 0.5:
+    if pred >= 0.5:
         return node.Leaf(varnames,1)
     else:
         return node.Leaf(varnames,0)
 
 def findattr(data, place):
 #helper function: given an index, counts all entries with a 1 in the attribute in that index
-#and also counts all entries with a one both in the given index and their last
+#and also counts all entries with a one in their last index
     posx = 0
     pos_x_y = 0
     for item in data:
         if item[place] == 1:
             posx += 1
-        if item[-1] == 1:
-            pos_x_y += 1
+            if item[-1] == 1:
+                pos_x_y += 1
 
     return (posx, pos_x_y)
 # Build tree in a top-down manner, selecting splits until we hit a
@@ -109,7 +121,7 @@ def build_tree(data, varnames):
     info = 0      #information gain, tallied per attribute
     for i in range(len(varnames) - 1):
         posx = 0      #count of the total entries with a 1 in their ith index
-        pos_x_y = 0   #and of the total entries with a 1 in their ith index AND their last index
+        pos_x_y = 0   #and of the total entries with a 1 in their last index
 
         res = findattr(data, i)
         posx = res[0]
